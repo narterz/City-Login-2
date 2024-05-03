@@ -10,6 +10,8 @@ import { FcGoogle } from "react-icons/fc";
 
 export default function SignUp() {
 
+    //TODO: Change email to username
+
     const handleSocialLogin = (social: string) => {
         switch(social){
             case "facebook":
