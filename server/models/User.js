@@ -1,35 +1,11 @@
 const mongoose = require("mongoose");
 const passportLocalMongoose = require("passport-local-mongoose");
-
-const specialCharsTest = (value) => {
-    const chars = /[`!@#$%^&*()_\-+=\[\]{};':"\\|,.<>\/?~ ]/;
-    const ints = /[0-9]/;
-    return chars.test(value) && chars.test(ints);
-};
-
-const capitalCharTest = (value) => {
-    return /[A-Z]/.test(value)
-}
-
-const passwordValidate = (value) => {
-    if(value.length >= 8){
-        return specialCharsTest && capitalCharTest 
-    } else {
-        return false
-    }
-}
-
-const usernameValidate = (value) => {
-    return value.length >= 8 && /[a-zA-Z]/.test(value);
-}
-
-const nameValidate = (value) => {
-    return /[0-9]/.test(value) && value;
-}
+const { nameValidate, passwordValidate, usernameValidate } = require("./validate");
 
 const User = new mongoose.Schema({    
     firstName: {
         type: String,
+        unique: true,
         validate: {
             validator: nameValidate
         },
@@ -38,6 +14,7 @@ const User = new mongoose.Schema({
     },
     lastName: {
         type: String,
+        unique: true,
         validate: {
             validator: nameValidate
         },
@@ -46,7 +23,7 @@ const User = new mongoose.Schema({
     },
     username: {
         type: String,
-        required: [true],
+        required: [true, "must enter a username"],
         validate: {
             validator: usernameValidate
         },
@@ -54,13 +31,15 @@ const User = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true],
+        required: [true, "Must enter a password"],
         validate: {
             validator: passwordValidate
         },
         message: "Password must contain at least eight characters and 1 capital and special characters"
-    }
+    }, 
 }, {timestamps: true});
+
+User.index({ createdAt: 1 }, {expireAfterSeconds: 86400});
 
 User.plugin(passportLocalMongoose);
 

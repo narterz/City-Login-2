@@ -2,46 +2,55 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const User = require("../models/User");
-const LocalStrategy = require('passport-local').Strategy;
-const User = require('../models/User');
 
-router.get('/', (req, res) => {
-    res.render('signUp')
-});
-
-router.get('/', (req, res) => {
-    res.render("login")
-})
-
-router.post('signUp', (req, res) => {
+router.post('/api/signUp', async (req, res) => {
+    console.log("This ran", req.body)
     const { firstName, lastName, username, password } = req.body;
-    User.register(new User({
-        email: username,
-        firstName: firstName,
-        lastName: lastName,
-        password: password
-    }), function (err, user) {
-        if (err) {
-            res.json({ success: false, message: "Login failed please try again" })
+    try {
+        const newUser = await User.create({
+            username: username,
+            password: password,
+            firstName: firstName,
+            lastName: lastName
+        });
+        console.log(newUser)
+        result = await newUser.save();
+        req.user = result;
+        res.status(201).json(result);
+    } catch (error) {
+        console.error(error)
+        if (error.errors) {
+            const errors = {};
+            for (let field in error.errors) {
+                errors[field] = error.errors[field].message;
+            }
+            return res.status(400).json({ errors })
         } else {
-            req.login(user, (err) => {
-                if (err) {
-                    res.json({ success: false, message: err })
-                } else {
-                    res.json({ success: true, message: "Account has been registered" })
-                }
-            });
+            console.error(error);
+            res.status(500).json(error);
         }
-    });
+    }
 });
 
-router.post('login', (req, res) => {
-    passport.authenticate("local", {failureRedirect: "/failure" }, 
-    function(req, res) {
-        res.redirect("/")
-    })
-})
+//Logins will be verified through the database using passport
+router.post('/api/login', async (req, res) => {
+    passport.authenticate("local", { failureRedirect: '/failure' },
+        (err, req, res, done) => {
+            res.json({ 
+                success: true, 
+                message: "User logged in",
+            })
+        })
+        res.redirect('/success')
+});
 
+router.get("/failure", (req, res) => {
+    res.render("failure")
+});
+
+router.get("/success", (req, res) => {
+    res.json({user: req.user})
+});
 
 module.exports = router;
 
