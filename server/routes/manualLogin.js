@@ -33,23 +33,28 @@ router.post('/api/signUp', async (req, res) => {
 });
 
 //Logins will be verified through the database using passport
-router.post('/api/login', async (req, res) => {
-    passport.authenticate("local", { failureRedirect: '/failure' },
-        (err, req, res, done) => {
-            res.json({ 
-                success: true, 
-                message: "User logged in",
-            })
-        })
-        res.redirect('/success')
+router.post('/api/login', (req, res, next) => {
+    passport.authenticate('local', { failureRedirect: '/failure' }, (err, user, info) => {
+        if (err) {
+            return next(err)
+        }
+        req.logIn(user, (err) => {
+            if (err) {
+                res.status(500).json({ message: 'Login failed' });
+            }
+            console.log("This ran")
+            res.status(200).json({ user });
+        });
+    })(req, res, next);
 });
+
 
 router.get("/failure", (req, res) => {
     res.render("failure")
 });
 
 router.get("/success", (req, res) => {
-    res.json({user: req.user})
+    res.json({ user: req.user })
 });
 
 module.exports = router;

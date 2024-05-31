@@ -14,15 +14,17 @@ const config: Config = {
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
       colors: {
-        "main": "#dee1e8",
-        "highlight": "#e8e5de",
-        "dark": "#525561",
-        "light-dark": "#3f424e",
-        "triadic": "#e8dee1",
-        "sky": "#b5a4ac"
+        "main": "#ee5253",
+        "secondary": "#202125",
+        "complement": "#e4ebfb",
+        "input-color": "#3f4044",
+        "text": "#282e38",
+        "text-white": "#fefefe",
+        "hover-main": "#f2cc35"
       },
       fontFamily: {
-        'sans': ['Roboto Condensed', 'sans-serif']
+        'Poppins': ['Poppins', 'sans-serif'],
+
       },
       fontWeight: {
         'normal': '400',

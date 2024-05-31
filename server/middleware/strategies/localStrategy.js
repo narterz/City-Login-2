@@ -1,15 +1,23 @@
 const LocalStrategy = require('passport-local').Strategy;
 const User = require("../../models/User");
 const passport = require("passport");
+const { isMatch } = require("../cryptic");
 
 passport.use(new LocalStrategy(
-    function (username, password, done) {
-        User.findOne({ username: username }, function (err, user) {
-            if (err) { return done(err); }
-            if (!user) { return done(null, false, { message: 'Incorrect username.' }); }
-            if (!user.verifyPassword(password)) { return done(null, false, { message: 'Incorrect password.' }); }
-            return done(null, user);
-        });
+    async function (username, password, done) {
+        try {
+            if(!username)throw new Error("Must enter a username");
+            if(!password)throw new Error("Must enter a password")
+            const query = await User.findOne({ username: username, }).exec();
+            console.log(query)
+            if (!query) { throw new Error("User not found") }
+            if (!isMatch(query.password)) {
+                throw new Error("Password does not match! Please try again")
+            }
+            done(null, query)
+        } catch (error) {
+            done(error)
+        }
     }
 ));
 

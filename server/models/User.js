@@ -1,44 +1,34 @@
 const mongoose = require("mongoose");
 const passportLocalMongoose = require("passport-local-mongoose");
-const { nameValidate, passwordValidate, usernameValidate } = require("./validate");
+const { hashCreds } = require('../middleware/cryptic');
 
 const User = new mongoose.Schema({    
     firstName: {
         type: String,
-        unique: true,
-        validate: {
-            validator: nameValidate
-        },
-        require: [false],
-        message: "Must enter a name that contains no numbers or special characters"
+        unique: false,
     },
     lastName: {
         type: String,
-        unique: true,
-        validate: {
-            validator: nameValidate
-        },
-        require: [false],
-        message: "Must enter a name that contains no numbers or special characters"
+        unique: false,
     },
     username: {
         type: String,
-        required: [true, "must enter a username"],
-        validate: {
-            validator: usernameValidate
-        },
-        message: "Username must contain at 1 letter and 8 characters"
+        require: [true, "This is required"],
     },
     password: {
         type: String,
-        required: [true, "Must enter a password"],
-        validate: {
-            validator: passwordValidate
-        },
-        message: "Password must contain at least eight characters and 1 capital and special characters"
-    }, 
+        required: [true, "This is required"],
+        unique: false,
+    },
 }, {timestamps: true});
 
+User.pre('save', async function (next) {
+    if ((this.isModified('password') || this.isNew) && this.hashPassword) {
+        const hashedPassword = await hashCreds(this.password);
+        this.password = hashedPassword;
+    }
+    next();
+});
 User.index({ createdAt: 1 }, {expireAfterSeconds: 86400});
 
 User.plugin(passportLocalMongoose);
