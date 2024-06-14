@@ -3,7 +3,6 @@
 import Home from './home/page';
 import { useAppSelector } from '@/app/lib/hooks';
 import { userSelector } from '@/app//lib/reducers/authUserSlice';
-import Loading from '@/app/components/loading';
 import './globals.css'
 import { useEffect } from 'react';
 
@@ -16,7 +15,7 @@ export default function Page() {
 
   return (
     <>
-      { loading ? <Loading /> : <Home />}
+       <Home />
     </>
   );
 }

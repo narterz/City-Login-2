@@ -1,29 +1,42 @@
-import { AuthState } from "../types";
+import { AuthState, UserAndRoutes } from "../types";
 import { toast } from "react-toastify";
 
 const specialChars = /[`!@#$%^&*()_\-+=\[\]{};':"\\|,.<>\/?~ ]/;
 
 const usernameValidate = (value: string) => {
-    return value.length >= 8 ? true : "Username must be eight characters long"
+    return value.length >= 8 
 }
 
-const passwordValidate = (value: string) => {
+const passwordValidate = (value: any) => {
     const ints = /[0-9]/;
     const capitals = /[A-Z]/
     if (value.length >= 8) {
         return specialChars.test(value) && ints.test(value) && capitals.test(value);
     } else {
-        return "Password must be at least 8 characters long with capital, number, and special characters"
+        return false
     }
 }
 
-export const isEmpty = (formData: AuthState['user'], pathname: string | undefined) => {
+export const validatePasswordChange = (user: AuthState['user']) => {
+    if (passwordValidate(user.password)) {
+        if (user.password === user.confirmPassword) {
+            return "Password changed"
+        } else {
+            return "Passwords do not match"
+        }
+    } else {
+        return passwordValidate(user.password)
+    }
+}
+
+export const isEmpty = (formData: UserAndRoutes) => {
     const inputs = Object.values(formData);
-    console.log(inputs)
     const hasEmptyInput = inputs.some(val => val === "");
-    if(hasEmptyInput){
-        if(pathname === '/api/login'){
-            if(!formData.username || !formData.password){
+    console.log(formData.pathname)
+    if (hasEmptyInput) {
+        if (formData.pathname === '/api/login') {
+            if (!formData.username || !formData.password) {
+                console.log("Thats here")
                 return "Must enter a username or password!"
             }
         } else {
@@ -33,23 +46,22 @@ export const isEmpty = (formData: AuthState['user'], pathname: string | undefine
     return true
 }
 
-export const validateLogin = (formData: AuthState['user'], pathname: string | undefined) => {
-    console.log(formData)
-    const emptyValues = isEmpty(formData, pathname);
-    const loginValidateValues = [ 
-        usernameValidate(formData.username), 
-        passwordValidate(formData.password)
-    ]
-    const failedValidations = loginValidateValues.filter(val => val !== true);
-    if(emptyValues !== true){
+export const validateLogin = (formData: UserAndRoutes) => {
+    const emptyValues = isEmpty(formData);
+    const loginValidateValues = {
+        usernameCheck: usernameValidate(formData.username),
+        passwordCheck: passwordValidate(formData.password)
+    }
+    if (!emptyValues) {
+        console.log("Its empty")
         toast.error(emptyValues);
         return false
     }
-    if(failedValidations.length > 0){
-        failedValidations.forEach((failure) => {
-            toast.error(failure)
-        })
-        return false
-    } 
+    if(loginValidateValues.passwordCheck !== true) {
+        return "Password must be at least 8 characters long with capital, number, and special characters"
+    }
+    if(loginValidateValues.passwordCheck !== true){
+        return "Username must be eight characters long"
+    }
     return true
 }

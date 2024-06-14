@@ -23,7 +23,7 @@ const config: Config = {
         "hover-main": "#f2cc35"
       },
       fontFamily: {
-        'Poppins': ['Poppins', 'sans-serif'],
+        'Poppins': ['Poppins'],
 
       },
       fontWeight: {
@@ -40,6 +40,7 @@ const config: Config = {
         'xs': '0.75rem',   // For h6
       },
       screens: {
+        'xsm:': "425px",
         'sm': '640px', 
         'md': '768px',  
         'lg': '1024px', 

@@ -1,10 +1,12 @@
 "use client"
 import { configureStore } from "@reduxjs/toolkit";
 import authUserSlice from "./reducers/authUserSlice";
+import jokeSlice from "./reducers/jokeSlice";
 
 export const store = configureStore({
     reducer: {
-        auth: authUserSlice
+        auth: authUserSlice,
+        jokes: jokeSlice
     }
 })
 

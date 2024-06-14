@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Laugh Login: 
 
-## Getting Started
+## A MERN fullstack application where you can securely authenticate your account and view funny jokes
 
-First, run the development server:
+This application is an upgrade of one of my first projects, City Login. In laugh login, a user can create an account manually or via Oauth2.0 from social media platforms Facebook, Github, Google, or Discord. Once a user logs in they are redirected to the joke page where they can view their account details and generate jokes. The authentication flow follows industry standards by securely handling data through encryption and database storage. When a user logs out their data will remain the database for 48 hours.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Features include
+* Manual sign up form: Logs users account to database
+* Manual login form: retrieves matching user from database
+* Forgot password form: Updates password by username
+* Comprehensive validation of user forms
+* Joke generator
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Skills portrayed
+* Fullstack development
+* Route handling
+* Redux state management
+* Database management
+* REST
+* Data encryption
+* Proxies
+* Oauth2.0
+* JWT
+* UI/UX
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
+* React
+* TypeScript
+* JavaScript
+* MongoDB
+* Mongoose
+* NextJS
+* TailwindCSS
+* CSS
+* NodeJS
+* ExpressJS
+* PassportJS
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## How to view this project
 
-## Learn More
+## Known Issues
+* Improper redirection when canceling Oauth from social media
+* Slight styling issues with responsiveness
+* Profile pictures not appearing with discord
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.

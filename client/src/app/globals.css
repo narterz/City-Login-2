@@ -39,13 +39,13 @@
     line-height: 1rem;
   }
 
+
   h1 {
-    font-size: 2.875rem;
-    color: #fefefe;
+    @apply xl:text-[2.475rem]  md:text-[1.875rem] text-[#fefefe]
   }
 
   h2 {
-    font-size: 1.875rem;
+    @apply xl:text-[1.875rem] md:text-[1rem];
   }
 
   h3 {
@@ -97,7 +97,6 @@
     height: 100%;
     backdrop-filter: blur(10px);
     pointer-events: none;
-
   }
 
   .blurImg {
@@ -120,7 +119,7 @@
     transform: translate(-50%, -50%);
     position: absolute;
     z-index: 2;
-    width: 80%;
+    width: 60%;
     padding: 20px;
     text-align: center;
   }

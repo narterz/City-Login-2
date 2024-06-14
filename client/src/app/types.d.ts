@@ -3,23 +3,29 @@ export type AuthState = {
         firstName?: string,
         lastName?: string,
         username: string,
-        password: string,
+        password?: string,
+        confirmPassword?: string;
     };
     auth: {
         isLoggedIn: boolean;
         loading?: boolean;
-        error?: any,
-        accessToken?: string,
+        error?: string | null
+        code: string | null
+        authType?: string;
     },
     socialMedia: {
-        id: string,
-        displayName: string,
-        photo: string
+        id: string | null,
+        displayName: string | null,
+        photo: string | null
     },
     routeInfo: {
         pathname?: string | undefined;
-        isLoggingIn?: boolean
     }
+}
+
+export type Joke = {
+    jokeArray: string[];
+    index: number
 }
 
 export type UserAndRoutes = AuthState['user'] & AuthState['routeInfo']

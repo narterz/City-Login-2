@@ -5,7 +5,6 @@ import { AuthState, UserAndRoutes } from "@/app/types";
 import { RootState } from "../store";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-const SUCCESS_URL = process.env.NEXT_SUCCESS_URL;
 
 export const initialState = {
     user: {
@@ -15,9 +14,10 @@ export const initialState = {
         password: "",
     },
     auth: {
-        isLoggedIn: false,
+        authType: "",
         loading: false,
-        error: null,
+        error: "",
+        code: "",
     },
     socialMedia: {
         id: "",
@@ -26,50 +26,28 @@ export const initialState = {
     },
     routeInfo: {
         pathname: '/api/signUp',
-        isLoggingIn: false
     }
 
 } as AuthState
 
-//If username and password are not entered
 export const signUpUser = createAsyncThunk(
     "user/auth",
-    async (user: UserAndRoutes): Promise<any> => {
+    async (user: UserAndRoutes, { rejectWithValue }): Promise<any> => {
+        console.log("Sign up is running...")
         try {
-            const endpoint = `${BASE_URL}${user.pathname}`
-            const response = await axios.post(endpoint, { ...user });
-            const userData = response.data.user;
-            const { firstName, lastName, username } = userData;
-            toast.success(`Welcome back ${firstName}`);
-            return userData;
+            const endpoint = `${BASE_URL}${user.pathname}`;
+            const response = await axios.post(endpoint, { ...user }, { withCredentials: true });
+            const userData = response.data;
+            const { username, firstName, lastName } = userData;
+            toast.success(`Signed in as ${username}`);
+            return { username, lastName, firstName };
         } catch (error: any) {
-            if (error.error.message) {
-                const errorMessage = error.response?.data?.message || error.message || "An error occurred";
-                console.log(errorMessage)
-            }
+            const errorMessage = error.response.data.message || "There was an error please try again";
+            toast.error(errorMessage)
+            return rejectWithValue(errorMessage)
         }
     }
 );
-
-//take optional parameter for path
-export const getSocialUser = createAsyncThunk(
-    "user/get", 
-    async (path?: string) => {
-        let endpoint: string | undefined;
-        path ? endpoint = path : endpoint = SUCCESS_URL
-        console.log(`endpoint being called ${endpoint}`)
-    try {
-        const response = axios.get(`${endpoint}`)
-        const user = (await response).data;
-        console.log(user)
-        // const { displayName } = userData;
-        // toast.success(`Welcome ${displayName}`);
-        // return userData
-    } catch (err) {
-        console.error(err)
-    }
-})
-
 
 export const AuthUserSlice = createSlice({
     name: "auth",
@@ -77,64 +55,51 @@ export const AuthUserSlice = createSlice({
     reducers: {
         addUser: (state, action: PayloadAction<AuthState['user']>) => {
             state.user = action.payload
+            state.auth.isLoggedIn = true
         },
         logoutUser: (state) => {
-            state.user = initialState.user;
-            state.auth.isLoggedIn = false
+            state.routeInfo = initialState.routeInfo;
+            state.socialMedia = initialState.socialMedia;
+            state.auth = initialState.auth;
+            state.user = initialState.user
         },
-        handleLoading: (state, action: PayloadAction<boolean>) => {
-            state.auth.loading = action.payload;
+        changeView: (state, action: PayloadAction<string>) => {
+            state.auth.authType = action.payload
         },
-        changePathname: (state, action: PayloadAction<AuthState['routeInfo']>) => {
-            state.routeInfo.pathname = action.payload.pathname;
-            state.routeInfo.isLoggingIn = action.payload.isLoggingIn
+        changePathname: (state, action: PayloadAction<string | undefined>) => {
+            state.routeInfo.pathname = action.payload;
         },
-        setSocialUser: (state, action: PayloadAction<AuthState['socialMedia'] & AuthState['auth']>) => {
+        setSocialUser: (state, action: PayloadAction<AuthState['socialMedia']>) => {
             state.socialMedia = action.payload
             state.auth.isLoggedIn = true
         },
-        changeRoute: (state, action: PayloadAction<boolean>) => {
-            state.routeInfo.isLoggingIn = action.payload
-        },
-        handleError: (state, action: PayloadAction<string | boolean>) => {
-            state.auth.error = action.payload;
+        handleError: (state, action: PayloadAction<AuthState['auth']>) => {
+            state.auth = action.payload;
         }
     },
     extraReducers: (builder) => {
         builder.addCase(signUpUser.pending, (state) => {
             console.log("Loading should be set to true")
             state.auth.loading = true
-            state.auth.error = null
+            state.auth.error = initialState.auth.error
         });
         builder.addCase(signUpUser.fulfilled, (state, action) => {
-            state.user = action.payload;
+            console.log("Fuffiled")
+            state.user = action.payload
             state.auth.isLoggedIn = true;
-            state.auth.error = false;
+            state.auth.error = initialState.auth.error
             state.auth.loading = false
         });
         builder.addCase(signUpUser.rejected, (state, action) => {
             state.auth.error = action.error.message;
             state.auth.loading = false
+            state.auth.isLoggedIn = false
+            state.user = initialState.user
         });
-
-        // builder.addCase(getSocialUser.pending, (state) => {
-        //     state.auth.loading = true
-        //     state.auth.error = null
-        // });
-        // builder.addCase(getSocialUser.fulfilled, (state, action) => {
-        //     state.socialMedia = action.payload;
-        //     state.auth.isLoggedIn = true
-        //     state.auth.error = false;
-        //     state.auth.loading = false
-        // });
-        // builder.addCase(getSocialUser.rejected, (state, action) => {
-        //     state.auth.error = action.error.message;
-        //     state.auth.loading = false
-        // });
     }
 });
 
-export const { addUser, logoutUser, changePathname, handleLoading, handleError, changeRoute, setSocialUser } = AuthUserSlice.actions;
-export const userSelector = (state: RootState) => state.auth
+export const { addUser, logoutUser, changeView, changePathname, handleError, setSocialUser } = AuthUserSlice.actions;
+export const userSelector = (state: RootState) => state.auth;
 export default AuthUserSlice.reducer;
 
