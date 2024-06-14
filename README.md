@@ -1,4 +1,6 @@
 # Laugh Login: 
+![image](https://github.com/narterz/City-Login-2/assets/67944400/cb718d5c-255a-43f2-b83a-97bf469a44d3)
+
 
 ## A MERN fullstack application where you can securely authenticate your account and view funny jokes
 
