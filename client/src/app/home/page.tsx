@@ -16,8 +16,6 @@ import { ChangeLogin } from "../components/changeLogin";
 import { SignUp } from "../components/signUp";
 import { Login } from "../components/login";
 
-//TODO: handle change account password
-
 export default function Home() {
     const [formData, setFormData] = useState<AuthState['user']>({
         firstName: "",
@@ -125,11 +123,6 @@ export default function Home() {
         } 
     }, [isLoggedIn]);
 
-    useEffect(() => {
-        console.log(pathname)
-
-    },[pathname])
-
     useEffect(() => { renderContent() }, [authType])
 
     return (
@@ -151,7 +144,7 @@ export default function Home() {
                 </div>
                 <div className="w-5/6 h-[10%] flex justify-center items-center">
                     {authType === "login"
-                        ? <h3 className="text-light font-normal" onClick={() => handlePathName("signUp")}>Don't have an account <b className="text-main opacity-hover">Sign Up</b></h3>
+                        ? <h3 className="text-light font-normal" onClick={() => handlePathName("signUp")}>Don&apos;t have an account <b className="text-main opacity-hover">Sign Up</b></h3>
                         : <h3 className="text-light font-normal" onClick={() => handlePathName("login")}>Already a Member? <b className="text-main opacity-hover">Login</b></h3>
                     }
                 </div>
