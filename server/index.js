@@ -10,7 +10,7 @@ const MongoStore = require("connect-mongo");
 const cookieParser = require('cookie-parser');
 
 //middleware imports
-// const { ErrorHandler } = require('./middleware/ErrorHandler');
+const { ErrorHandler } = require('./middleware/ErrorHandler');
 require("./database/db");
 require("./middleware/localStrategy");
 
@@ -27,7 +27,7 @@ const port = process.env.PORT || 4000;
 const sessionSecret = crypto.randomBytes(32).toString("hex");
 const cookieSecret = crypto.randomBytes(16).toString("hex");
 
-app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
+app.use(cors({credentials: true, origin: process.env.CLIENT_ORIGIN}));
 app.use(express.json());
 app.use(cookieParser(cookieSecret))
 
@@ -53,7 +53,7 @@ const User = require('./models/User');
 require('./models/SocialUser')
 
 //middleware
-// app.use(ErrorHandler)
+app.use(ErrorHandler)
 
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
