@@ -1,61 +1,50 @@
 const express = require("express");
 const router = express.Router();
-const passport = require("passport");
-const User = require("../models/User");
+const passport = require("passport")
+const { QueryLocalUser, ChangeAccount } = require("../database/queries/localQueries");
 
 router.post('/api/signUp', async (req, res) => {
     console.log("This ran", req.body)
     const { firstName, lastName, username, password } = req.body;
+    const newUser = {
+        username: username,
+        password: password,
+        firstName: firstName,
+        lastName: lastName
+    };
     try {
-        const newUser = await User.create({
-            username: username,
-            password: password,
-            firstName: firstName,
-            lastName: lastName
-        });
-        console.log(newUser)
-        result = await newUser.save();
-        req.user = result;
-        res.status(201).json(result);
+        const queryUser = await QueryLocalUser(newUser);
+        res.status(201).json(queryUser)
     } catch (error) {
-        console.error(error)
-        if (error.errors) {
-            const errors = {};
-            for (let field in error.errors) {
-                errors[field] = error.errors[field].message;
-            }
-            return res.status(400).json({ errors })
-        } else {
-            console.error(error);
-            res.status(500).json(error);
-        }
+        console.log(error)
+        res.status(error.code).json(error)
     }
 });
 
-//Logins will be verified through the database using passport
 router.post('/api/login', (req, res, next) => {
     passport.authenticate('local', { failureRedirect: '/failure' }, (err, user, info) => {
-        if (err) {
-            return next(err)
+        console.log("This is the user", user)
+        if(err){
+            return res.status(500).json({message: "Internal server error please try again"})
         }
-        req.logIn(user, (err) => {
-            if (err) {
-                res.status(500).json({ message: 'Login failed' });
-            }
-            console.log("This ran")
-            res.status(200).json({ user });
-        });
+        if(!user){
+            return res.status(401).json({message: "Invalid credentials"})
+        }
+        res.status(201).json(user)
     })(req, res, next);
 });
 
-
-router.get("/failure", (req, res) => {
-    res.render("failure")
-});
-
-router.get("/success", (req, res) => {
-    res.json({ user: req.user })
-});
+router.post("/change/login", async (req, res) => {
+    const { username, password } = req.body;
+    const user = { username, password }
+    console.log("3: This is the user passed to backend", user)
+    try {
+        const updatedAccount = await ChangeAccount(user);
+        res.json(updatedAccount)
+    } catch (error) {
+        res.status(error.code).json(error)
+    }
+})
 
 module.exports = router;
 

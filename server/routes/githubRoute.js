@@ -3,78 +3,59 @@ const router = express.Router();
 const { generateState } = require('../middleware/cryptic');
 const axios = require("axios");
 const { URLSearchParams } = require('url');
-const SocialUser = require("../models/SocialUser");
+const { CreateSocialUser, FetchSocialData } = require('../database/queries/socialQueries');
 
-const { 
-    GITHUB_CLIENT_ID, 
-    GITHUB_CLIENT_SECRET, 
-    GITHUB_CALLBACK_URL, 
-    CLIENT_SUCCESS 
+const {
+    GITHUB_CLIENT_ID,
+    GITHUB_CLIENT_SECRET,
+    GITHUB_CALLBACK_URL,
+    CLIENT_SUCCESS,
 } = process.env
-
-async function getGitHubUsers(token) {
-    try {
-        const response = await axios.get("https://api.github.com/user", {
-            headers: {
-                "Authorization": `Bearer ${token}`,
-            }
-        });
-        return response.data
-    } catch (error) {
-        console.error(error)
-    }
-}
 
 router.get("/auth/github", (req, res) => {
     const state = generateState();
     req.session.state = state;
-    const options = {
+    const params = new URLSearchParams({
         client_id: GITHUB_CLIENT_ID,
         redirect_uri: GITHUB_CALLBACK_URL,
         scope: "read:user",
         client_secret: GITHUB_CLIENT_SECRET,
         state: state
-    }
-    console.log(options)
-    const params = new URLSearchParams(options).toString();
+    }).toString()
     res.redirect(`https://github.com/login/oauth/authorize?${params}`)
 });
 
-router.get("/auth/github/callback", async (req, res) => {
+router.get("/auth/github/callback", async (req, res, next) => {
+    const { code } = req.query;
+    const getUsersUrl = "https://api.github.com/user";
     try {
         const response = await axios.post("https://github.com/login/oauth/access_token", {
             client_id: GITHUB_CLIENT_ID,
             client_secret: GITHUB_CLIENT_SECRET,
-            code: req.query.code
+            code: code
         }, {
-            headers: {
-                Accept: "application/json"
-            }
+            headers: { Accept: "application/json" }
         })
         const { access_token } = response.data;
-        const existingUser = await SocialUser.findOne({ accessToken: token }).exec();
-        if(!existingUser){
-            const githubDetails = await getGitHubUsers(access_token);
-            const { name, id, avatar_url } = githubDetails.data;
-            const user = {
-                displayName: name,
-                id: id,
-                accessToken: access_token,
-                photo: avatar_url
-            }
-            req.user = user
-        } else {
-            req.user = existingUser
+        const githubUser = await FetchSocialData(getUsersUrl, access_token);
+        const { login, id, avatar_url } = githubUser;
+        const profile = {
+            displayName: login,
+            id: id,
+            photo: avatar_url,
+            accessToken: access_token
         }
-        res.redirect('/success')
+        console.log(profile)
+        const user = await CreateSocialUser(profile);
+        const queryParams = new URLSearchParams({
+            id: user.id,
+            displayName: user.displayName,
+            photo: user.photo
+        }).toString();
+        res.redirect(`${CLIENT_SUCCESS}?${queryParams}`);
     } catch (error) {
-        console.log(error)
+        next(error)
     }
 });
-
-router.get("/success", (req, res) => {
-    res.json(req.user)
-    res.redirect(CLIENT_SUCCESS)
-})
 
 module.exports = router;

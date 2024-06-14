@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { hashCreds } = require("../middleware/cryptic");
+const { hashTokens } = require("../middleware/cryptic");
 
 const SocialUser = new mongoose.Schema({
     displayName: {
@@ -14,32 +14,39 @@ const SocialUser = new mongoose.Schema({
     },
     accessToken: {
         type: String,
-        unique: false,
+        unique: true,
         require: [true, "User logging in with social media must have a access token"]
-
     },
     refreshToken: {
         type: String,
-        unique: false,
-        require: [false]
+        default: null
     },
     photo: {
         type: String,
         require: [false],
         default: ""
-    }
-})
+    },
+
+}, { autoIndex: true, timestamps: true })
 
 SocialUser.pre('save', async function (next) {
-    const hashedToken = await hashCreds(this.accessToken)
-    if(this.refreshToken){
-        const hashedRefreshToken = await hashCreds(this.refreshToken);
-        this.refreshToken = hashedRefreshToken
+    if (!this.isModified('accessToken')) {
+        return next();
     }
-    this.refreshToken = hashedToken
-    next();
+    try {
+        const hashToken = hashTokens(this.accessToken);
+        this.accessToken = hashToken
+        if (this.refreshToken) {
+            const hashedRefresh = hashTokens(this.refreshToken);
+            this.refreshToken = hashedRefresh
+        }
+        next();
+    } catch (error) {
+        next(error);
+    }
 });
+SocialUser.index({ createdAt: 1 }, { expireAfterSeconds: 86400 });
 
-SocialUser.index({ createdAt: 1 }, {expireAfterSeconds: 86400});
+SocialUser.index({ accessToken: 1 });
 
 module.exports = mongoose.model("SocialUser", SocialUser);

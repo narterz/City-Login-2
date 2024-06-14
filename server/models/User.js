@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const passportLocalMongoose = require("passport-local-mongoose");
-const { hashCreds } = require('../middleware/cryptic');
+const { hashTokens } = require('../middleware/cryptic');
 
 const User = new mongoose.Schema({    
     firstName: {
@@ -23,12 +23,18 @@ const User = new mongoose.Schema({
 }, {timestamps: true});
 
 User.pre('save', async function (next) {
-    if ((this.isModified('password') || this.isNew) && this.hashPassword) {
-        const hashedPassword = await hashCreds(this.password);
-        this.password = hashedPassword;
+    if (this.isModified('password') || this.isNew) {
+        try {
+            const hashedPassword = await hashTokens(this.password);
+            this.password = hashedPassword;
+            console.log('Hashed Password:', this.password); // Log to verify the hash
+        } catch (err) {
+            return next(err);
+        }
     }
     next();
 });
+
 User.index({ createdAt: 1 }, {expireAfterSeconds: 86400});
 
 User.plugin(passportLocalMongoose);
