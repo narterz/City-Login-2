@@ -123,7 +123,11 @@ export default function Home() {
         } 
     }, [isLoggedIn]);
 
-    useEffect(() => { renderContent() }, [authType])
+    useEffect(() => { renderContent() }, [authType]);
+
+        useEffect(() => {
+        console.log(process.env.NEXT_PUBLIC_BASE_URL)
+    },[])
 
     return (
         <div className="w-full h-full flex flex-row justify-between">
