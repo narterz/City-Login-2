@@ -1,51 +1,20 @@
 {
     "version": 2,
-    "builds": [
-        {
-            "src": "*.js",
-            "use": "@vercel/node"
-        }
-    ],
     "routes": [
         {
-          "src": "/auth/discord",
-          "dest": "/routes/discordRoute.js"
+            "handle": "filesystem"
         },
         {
-          "src": "/auth/discord/callback",
-          "dest": "/routes/discordRoute.js"
+            "src": "/api/(.*)",
+            "dest": "/routes/local.js"
         },
         {
-          "src": "/auth/facebook",
-          "dest": "/routes/facebookRoute.js"
+            "src": "/auth/(.*)",
+            "dest": "/routes/google.js"
         },
         {
-          "src": "/auth/facebook/callback",
-          "dest": "/routes/facebookRoute.js"
-        },
-        {
-          "src": "/auth/google",
-          "dest": "/routes/googleRoute.js"
-        },
-        {
-          "src": "/auth/google/callback",
-          "dest": "/routes/googleRoute.js"
-        },
-        {
-          "src": "/auth/github",
-          "dest": "/routes/githubRoute.js"
-        },
-        {
-          "src": "/auth/github/callback",
-          "dest": "/routes/githubRoute.js"
-        },
-        {
-          "src": "/api/signUp",
-          "dest": "/routes/manualLogin.js"
-        },
-        {
-          "src": "/api/login",
-          "dest": "/routes/manualLogin.js"
+            "src": "/(.*)",
+            "dest": "/index.js"
         }
-      ]
+    ]
 }
