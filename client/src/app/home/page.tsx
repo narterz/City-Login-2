@@ -123,6 +123,10 @@ export default function Home() {
         } 
     }, [isLoggedIn]);
 
+    useEffect(() => {
+        console.log(process.env.NEXT_PUBLIC_BASE_URL)
+    },[])
+
     useEffect(() => { renderContent() }, [authType])
 
     return (
